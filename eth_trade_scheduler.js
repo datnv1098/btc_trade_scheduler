@@ -53,7 +53,7 @@ function getKlines(symbol, callback) {
 
   try {
     const params = {
-      symbol,       // Cặp giao dịch, ví dụ: BTCUSDT
+      symbol,       // Cặp giao dịch, ví dụ: ETHUSDT
       interval: INTERVAL,     // Khoảng thời gian nến, ví dụ: 1m, 5m
       startTime,    // Timestamp thời điểm bắt đầu (ms)
       endTime,      // Timestamp thời điểm kết thúc (ms)
@@ -78,27 +78,27 @@ function getKlines(symbol, callback) {
 
 // Đặt lệnh mua với giá thấp nhất
 function buyAtLowestPrice() {
-  getKlines('BTCUSDT', (err, prices) => {
+  getKlines('ETHUSDT', (err, prices) => {
     if (err) return console.error('Lỗi khi lấy dữ liệu giá:', err);
 
-    console.log(`Giá thấp nhất để mua BTC: ${prices.low}`);
-    console.log(`Quantity: ${(AMOUNT_USDT / prices.low).toFixed(6)}`);
-    console.log(`Price: ${prices?.low?.toFixed(2)}`);
+    console.log(`Giá ETH thấp nhất để mua: ${prices.low}`);
+    console.log(`Quantity ETH: ${(AMOUNT_USDT / prices.low).toFixed(6)}`);
+    console.log(`Price ETH: ${prices?.low?.toFixed(2)}`);
 
     sendRequest(
       'POST',
       '/api/v3/order',
       {
-        symbol: 'BTCUSDT',
+        symbol: 'ETHUSDT',
         side: 'BUY',
         type: 'LIMIT',
         timeInForce: 'GTC',
-        quantity: (AMOUNT_USDT / prices.low).toFixed(5),
+        quantity: (AMOUNT_USDT / prices.low).toFixed(4),
         price: prices?.low?.toFixed(2),
       },
       (err, response) => {
-        if (err) return console.error('Lỗi khi đặt lệnh mua BTC:', err);
-        console.log('Đặt lệnh mua BTC thành công:', response);
+        if (err) return console.error('Lỗi khi đặt lệnh mua ETH:', err);
+        console.log('Đặt lệnh mua ETH thành công:', response);
       }
     );
   });
@@ -106,66 +106,65 @@ function buyAtLowestPrice() {
 
 // Đặt lệnh bán với giá cao nhất
 function sellAtHighestPrice() {
-  getKlines('BTCUSDT', (err, prices) => {
-    if (err) return console.error('Lỗi khi lấy dữ liệu giá:', err);
+  getKlines('ETHUSDT', (err, prices) => {
+    if (err) return console.error('Lỗi khi lấy dữ liệu giá ETH:', err);
 
-    console.log(`Giá cao nhất để bán BTC: ${prices.high}`);
+    console.log(`Giá cao nhất để bán ETH: ${prices.high}`);
 
-    // Lấy số dư BTC hiện tại
+    // Lấy số dư ETH hiện tại
     sendRequest('GET', '/api/v3/account', {}, (err, data) => {
       if (err) return console.error('Lỗi khi lấy thông tin tài khoản:', err);
-      const btcBalance = parseFloat(
-        data.balances.find(asset => asset.asset === 'BTC').free
+      const ETHBalance = parseFloat(
+        data.balances.find(asset => asset.asset === 'ETH').free
       );
-      console.log({btcBalance});
-      if (btcBalance > 0.0001) {
+      console.log({ETHBalance});
+      if (ETHBalance > 0.0001) {
         sendRequest(
           'POST',
           '/api/v3/order',
           {
-            symbol: 'BTCUSDT',
+            symbol: 'ETHUSDT',
             side: 'SELL',
             type: 'LIMIT',
             timeInForce: 'GTC',
-            quantity: btcBalance.toFixed(4),
+            quantity: ETHBalance.toFixed(4),
             price: prices.high.toFixed(2),
           },
           (err, response) => {
-            if (err) return console.error('Lỗi khi đặt lệnh bán BTC:', err);
-            console.log('Đặt lệnh bán BTC thành công:', response);
+            if (err) return console.error('Lỗi khi đặt lệnh bán ETH:', err);
+            console.log('Đặt lệnh bán ETH thành công:', response);
           }
         );
       } else {
-        console.log('Không có BTC để bán.');
+        console.log('Không có ETH để bán.');
       }
     });
   });
 }
 
 
-function BTCSchedulerCronJob() {
+function ETHSchedulerCronJob() {
   const currentDate = new Date();
   const isUTC = currentDate.getHours() === currentDate.getUTCHours();
-  console.log("isUTC: ", isUTC);
   let cronJobStrLogTime = '*/10 * * * *';
   schedule.scheduleJob(cronJobStrLogTime, function () {
-    console.log('Current time BTC Run CronJob:', moment().format('YYYY-MM-DD HH:mm:ss'));
+    console.log('Current time ETH Run CronJob:', moment().format('YYYY-MM-DD HH:mm:ss'));
   });
 
   let cronJobStrBUY = isUTC ? '0 22 * * *' : '0 5 * * *';
-  // Lịch mua BTC lúc 5h sáng VN Time
+  // Lịch mua ETH lúc 5h sáng VN Time
   schedule.scheduleJob(cronJobStrBUY, () => {
-    console.log('Mua BTC dựa trên giá thấp nhất trước 5h sáng...', API_KEY);
+    console.log('Mua ETH dựa trên giá thấp nhất trước 5h sáng...', API_KEY);
     buyAtLowestPrice();
   });
   let cronJobStrSELL = isUTC ? '0 3 * * *' : '0 10 * * *';
-  // // Lịch bán BTC lúc 10h sáng VN Time
+  // // Lịch bán ETH lúc 10h sáng VN Time
   schedule.scheduleJob(cronJobStrSELL, () => {
-    console.log('Bán BTC dựa trên giá cao nhất trước 10h sáng...');
+    console.log('Bán ETH dựa trên giá cao nhất trước 10h sáng...');
     sellAtHighestPrice();
   });
 }
 
 module.exports = {
-  BTCSchedulerCronJob
+  ETHSchedulerCronJob
 };
