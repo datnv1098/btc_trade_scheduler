@@ -63,7 +63,7 @@ jobs:
     env:
       DEPLOY_SSH_PORT: 22
       DEPLOY_SSH_USER: root
-      DEPLOY_SSH_HOST: 47.130.45.132
+      DEPLOY_SSH_HOST: ${{ secrets.DOCKER_URL }}
     steps:
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -72,7 +72,7 @@ jobs:
           images: '${{ secrets.DOCKER_URL }}/node-app/trading-bot'
 
       - name: executing remote ssh commands using key
-        uses: appleboy/ssh-action@v1.1.0
+        uses: appleboy/ssh-action@v1.0.0
         env:
           CONTAINER_NAME: trading-bot
           DOCKER_URL: ${{ secrets.DOCKER_URL }}
