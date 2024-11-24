@@ -14,15 +14,18 @@ jobs:
       contents: read
       attestations: write
       id-token: write
-    env:
-      TELEGRAM_CHAT_ID: "$TELEGRAM_CHAT_ID"
-      TELEGRAM_TOKEN: "$TELEGRAM_TOKEN"
-      API_KEY: "$API_KEY"
-      API_SECRET: "$API_SECRET"
-      AMOUNT_USDT: "$AMOUNT_USDT"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
+
+      - name: Set env
+        id: get_env_runners
+        run: |
+          echo "$(printenv | sort | egrep '^TELEGRAM_CHAT_ID')" >> $GITHUB_ENV
+          echo "$(printenv | sort | egrep '^TELEGRAM_TOKEN')" >> $GITHUB_ENV
+          echo "$(printenv | sort | egrep '^API_KEY')" >> $GITHUB_ENV
+          echo "$(printenv | sort | egrep '^API_SECRET')" >> $GITHUB_ENV
+          echo "$(printenv | sort | egrep '^AMOUNT_USDT')" >> $GITHUB_ENV
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
@@ -45,7 +48,7 @@ jobs:
           echo
           echo "secrets: ${{ toJSON(secrets) }}"
           echo
-          echo "Runner: ${{ toJSON(runner) }}"
+          echo "Runner: ${{ toJSON(env) }}"
           echo
         shell: bash
 
@@ -59,11 +62,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID
-            TELEGRAM_TOKEN=$TELEGRAM_TOKEN
-            API_KEY=$API_KEY
-            API_SECRET=$API_SECRET
-            AMOUNT_USDT=$AMOUNT_USDT
+            TELEGRAM_CHAT_ID=${{ env.TELEGRAM_CHAT_ID }}
+            TELEGRAM_TOKEN=${{ env.TELEGRAM_TOKEN}}
+            API_KEY=${{ env.API_KEY }}
+            API_SECRET=${{ env.API_SECRET }}
+            AMOUNT_USDT=${{ env.AMOUNT_USDT }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
