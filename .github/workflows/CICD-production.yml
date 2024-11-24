@@ -41,11 +41,11 @@ jobs:
         run: |
           echo "steps: ${{ toJSON(steps) }}"
           echo
-          echo "TELEGRAM_CHAT_ID: ${{ env.TELEGRAM_CHAT_ID }}"
-          echo
           echo "github: ${{ toJSON(github) }}"
           echo
           echo "secrets: ${{ toJSON(secrets) }}"
+          echo
+          echo "Runner: ${{ toJSON(runner.env) }}"
           echo
         shell: bash
 
