@@ -33,9 +33,14 @@ jobs:
       
       - name: Run script file
         run: |
-          echo "${{ toJSON(steps.meta) }}"
-          echo "${{ toJSON(github) }}"
-          echo "${{ toJSON(secrets) }}"
+          echo "steps: ${{ toJSON(steps) }}"
+          echo
+          echo "TELEGRAM_CHAT_ID: ${{ env.TELEGRAM_CHAT_ID }}"
+          echo
+          echo "github: ${{ toJSON(github) }}"
+          echo
+          echo "secrets: ${{ toJSON(secrets) }}"
+          echo
         shell: bash
 
       - name: Build and push Docker image
