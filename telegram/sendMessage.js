@@ -29,7 +29,7 @@ async function sendTelegramMessage(message) {
         console.log(error);
         await axios.post(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
             chat_id: telegramChatId,
-            text: message?.replaceAll('.', ','),
+            text: 'Error sending message to the Telegram bot',
             parse_mode: 'MarkdownV2'
         });
     }

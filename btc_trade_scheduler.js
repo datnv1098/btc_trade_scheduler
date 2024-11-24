@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const schedule = require('node-schedule');
 const axios = require("axios");
 const moment = require("moment");
+const {sendTelegramMessage, getMessageData} = require("./telegram/sendMessage");
 
 const API_KEY = process.env.API_KEY;
 const API_SECRET = process.env.API_SECRET;
@@ -80,11 +81,8 @@ function getKlines(symbol, callback) {
 function buyAtLowestPrice() {
   getKlines('BTCUSDT', (err, prices) => {
     if (err) return console.error('Lỗi khi lấy dữ liệu giá:', err);
-
-    console.log(`Giá thấp nhất để mua BTC: ${prices.low}`);
-    console.log(`Quantity: ${(AMOUNT_USDT / prices.low).toFixed(6)}`);
-    console.log(`Price: ${prices?.low?.toFixed(2)}`);
-
+    const quantity = (AMOUNT_USDT / prices.low).toFixed(5);
+    const price = prices?.low?.toFixed(2);
     sendRequest(
       'POST',
       '/api/v3/order',
@@ -93,12 +91,24 @@ function buyAtLowestPrice() {
         side: 'BUY',
         type: 'LIMIT',
         timeInForce: 'GTC',
-        quantity: (AMOUNT_USDT / prices.low).toFixed(5),
-        price: prices?.low?.toFixed(2),
+        quantity: quantity,
+        price: price,
       },
       (err, response) => {
-        if (err) return console.error('Lỗi khi đặt lệnh mua BTC:', err);
-        console.log('Đặt lệnh mua BTC thành công:', response);
+        console.log(response);
+        if (err) return sendTelegramMessage('Mua BTC Error: ' + JSON.stringify(err)).then();
+        if(response?.orderId){
+          const message = getMessageData({
+            symbol: 'BTCUSDT', quantity, price, amount: quantity * price
+          }, true);
+          sendTelegramMessage(message).then();
+        }else{
+          const message = (typeof response === 'string') ? response : JSON.stringify(response);
+          const msg = getMessageData({
+            symbol: 'BTCUSDT', quantity, price, message, amount: quantity * price
+          }, true);
+          sendTelegramMessage(msg).then();
+        }
       }
     );
   });
@@ -119,6 +129,8 @@ function sellAtHighestPrice() {
       );
       console.log({btcBalance});
       if (btcBalance > 0.0001) {
+        const quantity = btcBalance.toFixed(4);
+        const price = prices.high.toFixed(2);
         sendRequest(
           'POST',
           '/api/v3/order',
@@ -127,12 +139,24 @@ function sellAtHighestPrice() {
             side: 'SELL',
             type: 'LIMIT',
             timeInForce: 'GTC',
-            quantity: btcBalance.toFixed(4),
-            price: prices.high.toFixed(2),
+            quantity: quantity,
+            price: price,
           },
           (err, response) => {
-            if (err) return console.error('Lỗi khi đặt lệnh bán BTC:', err);
-            console.log('Đặt lệnh bán BTC thành công:', response);
+            console.log(response);
+            if (err) return sendTelegramMessage('Bán BTC Error: ' + JSON.stringify(err)).then();
+            if(response?.orderId){
+              const message = getMessageData({
+                symbol: 'BTCUSDT', quantity, price, amount: quantity * price
+              }, false);
+              sendTelegramMessage(message).then();
+            }else{
+              const message = (typeof response === 'string') ? response : JSON.stringify(response);
+              const msg = getMessageData({
+                symbol: 'BTCUSDT', quantity, price, message, amount: quantity * price
+              }, false);
+              sendTelegramMessage(msg).then();
+            }
           }
         );
       } else {
@@ -164,6 +188,10 @@ function BTCSchedulerCronJob() {
     console.log('Bán BTC dựa trên giá cao nhất trước 10h sáng...');
     sellAtHighestPrice();
   });
+
+  // Run test
+  // buyAtLowestPrice();
+  // sellAtHighestPrice();
 }
 
 module.exports = {

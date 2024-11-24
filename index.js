@@ -9,7 +9,7 @@ function runMain() {
   console.log('System Time Zone:', systemTimeZone);
   console.log("Main Start Time: ", moment().format('YYYY-MM-DD HH:mm:ss'));
   getChannelId().then()
-  // BTCSchedulerCronJob();
+  BTCSchedulerCronJob();
   ETHSchedulerCronJob();
 }
 

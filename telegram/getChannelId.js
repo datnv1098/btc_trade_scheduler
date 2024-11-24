@@ -6,7 +6,6 @@ async function getChannelId() {
     try {
         console.log({telegramToken});
         const response = await axios.get(`https://api.telegram.org/bot${telegramToken}/getUpdates`);
-        console.log("response?.data", JSON.stringify(response?.data));
         const updates = response.data.result;
         // Find the channel post message
         for (let update of updates) {
