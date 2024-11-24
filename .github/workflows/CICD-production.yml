@@ -29,14 +29,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: node-app/trading-bot
+          images: '${{ secrets.DOCKER_URL }}/node-app/trading-bot'
       
       - name: Run script file
         run: |
           ls -la /tmp/
           pwd
           ls -la
-          echo "${{ steps.meta.outputs }}"
+          echo "${{ toJSON(steps.meta.outputs) }}"
         shell: bash
 
       - name: Build and push Docker image
@@ -46,7 +46,7 @@ jobs:
           context: .
           file: ./deploy/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: 'latest'
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
             TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
