@@ -171,22 +171,23 @@ function BTCSchedulerCronJob() {
   const currentDate = new Date();
   const isUTC = currentDate.getHours() === currentDate.getUTCHours();
   console.log("isUTC: ", isUTC);
-  let cronJobStrLogTime = '*/10 * * * *';
+  let cronJobStrLogTime = '*/1 * * * *';
   schedule.scheduleJob(cronJobStrLogTime, function () {
     console.log('Current time BTC Run CronJob:', moment().format('YYYY-MM-DD HH:mm:ss'));
+    console.log('Print ENV:', process.env);
   });
 
   let cronJobStrBUY = isUTC ? '0 22 * * *' : '0 5 * * *';
   // Lịch mua BTC lúc 5h sáng VN Time
   schedule.scheduleJob(cronJobStrBUY, () => {
     console.log('Mua BTC dựa trên giá thấp nhất trước 5h sáng...', API_KEY);
-    buyAtLowestPrice();
+    // buyAtLowestPrice();
   });
   let cronJobStrSELL = isUTC ? '0 3 * * *' : '0 10 * * *';
   // // Lịch bán BTC lúc 10h sáng VN Time
   schedule.scheduleJob(cronJobStrSELL, () => {
     console.log('Bán BTC dựa trên giá cao nhất trước 10h sáng...');
-    sellAtHighestPrice();
+    // sellAtHighestPrice();
   });
 
   // Run test
