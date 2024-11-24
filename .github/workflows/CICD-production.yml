@@ -89,7 +89,6 @@ jobs:
           port: ${{ env.DEPLOY_SSH_PORT }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           envs: CONTAINER_NAME,DOCKER_URL,DOCKER_USERNAME,DOCKER_PASSWORD,IMAGE_URL,IMAGE_NAME,DOCKER_NETWORK,DOCKER_HOSTNAME,TIME_PERIOD
-          debug: true
           script_stop: true
           script: |
             whoami
