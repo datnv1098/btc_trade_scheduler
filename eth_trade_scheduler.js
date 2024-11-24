@@ -162,17 +162,20 @@ function ETHSchedulerCronJob() {
   });
 
   let cronJobStrBUY = isUTC ? '0 22 * * *' : '0 5 * * *';
-  // Lịch mua ETH lúc 5h sáng VN Time
   schedule.scheduleJob(cronJobStrBUY, () => {
     console.log('Mua ETH dựa trên giá thấp nhất trước 5h sáng...', API_KEY);
     buyAtLowestPrice();
   });
+
   let cronJobStrSELL = isUTC ? '0 3 * * *' : '0 10 * * *';
-  // // Lịch bán ETH lúc 10h sáng VN Time
   schedule.scheduleJob(cronJobStrSELL, () => {
     console.log('Bán ETH dựa trên giá cao nhất trước 10h sáng...');
     sellAtHighestPrice();
   });
+
+  // Run test
+  // buyAtLowestPrice();
+  // sellAtHighestPrice();
 }
 
 module.exports = {
