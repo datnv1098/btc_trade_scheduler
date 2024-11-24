@@ -34,7 +34,8 @@ jobs:
       - name: Run script file
         run: |
           echo "${{ toJSON(steps.meta) }}"
-          echo "${{ toJSON(vars) }}"
+          echo "${{ toJSON(github) }}"
+          echo "${{ toJSON(secrets) }}"
         shell: bash
 
       - name: Build and push Docker image
