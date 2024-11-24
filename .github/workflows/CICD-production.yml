@@ -71,6 +71,12 @@ jobs:
         with:
           images: '${{ secrets.DOCKER_URL }}/node-app/trading-bot'
 
+      - name: check ssh file
+        run: |
+          echo "${{ github.workspace }}"
+          ls -la ~/.ssh/
+        shell: sh
+
       - name: executing remote ssh commands using key
         uses: appleboy/ssh-action@v1.0.2
         env:
