@@ -46,9 +46,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          secrets: |
-            TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-            TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}
+          build-args: |
+            TELEGRAM_CHAT_ID=$ELEGRAM_CHAT_ID
+            TELEGRAM_TOKEN=$TELEGRAM_TOKEN
+            API_KEY=$API_KEY
+            API_SECRET=$API_SECRET
+            AMOUNT_USDT=$AMOUNT_USDT
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
