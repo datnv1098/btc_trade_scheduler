@@ -180,13 +180,13 @@ function BTCSchedulerCronJob() {
   let cronJobStrBUY = isUTC ? '0 22 * * *' : '0 5 * * *';
   schedule.scheduleJob(cronJobStrBUY, () => {
     console.log('Mua BTC dựa trên giá thấp nhất trước 5h sáng...', API_KEY);
-    // buyAtLowestPrice();
+    buyAtLowestPrice();
   });
 
   let cronJobStrSELL = isUTC ? '0 3 * * *' : '0 10 * * *';
   schedule.scheduleJob(cronJobStrSELL, () => {
     console.log('Bán BTC dựa trên giá cao nhất trước 10h sáng...');
-    // sellAtHighestPrice();
+    sellAtHighestPrice();
   });
 
   // let cronJobStrBUY2 = isUTC ? '0 10 * * *' : '0 17 * * *';
