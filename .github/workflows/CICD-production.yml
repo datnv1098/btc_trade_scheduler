@@ -39,18 +39,6 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: '${{ secrets.DOCKER_URL }}/node-app/trading-bot'
-      
-      - name: Run script file
-        run: |
-          echo "steps: ${{ toJSON(steps) }}"
-          echo
-          echo "github: ${{ toJSON(github) }}"
-          echo
-          echo "secrets: ${{ toJSON(secrets) }}"
-          echo
-          echo "Runner: ${{ toJSON(env) }}"
-          echo
-        shell: bash
 
       - name: Build and push Docker image
         id: push
@@ -105,6 +93,8 @@ jobs:
           port: ${{ env.DEPLOY_SSH_PORT }}
           envs: CONTAINER_NAME,DOCKER_URL,DOCKER_USERNAME,DOCKER_PASSWORD,IMAGE_URL,IMAGE_NAME,DOCKER_NETWORK,DOCKER_HOSTNAME,TIME_PERIOD
           script: |
+            whoami
+            ls -al
             echo $DOCKER_PASSWORD | docker login $DOCKER_URL --username $DOCKER_USERNAME --password-stdin
             docker pull $IMAGE_URL
             if [ "$(docker ps -q -af name=$CONTAINER_NAME)" ]; then docker rm -f $CONTAINER_NAME; fi
