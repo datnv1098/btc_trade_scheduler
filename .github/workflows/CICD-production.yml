@@ -14,6 +14,14 @@ jobs:
       contents: read
       attestations: write
       id-token: write
+    envs:
+      CONTAINER_NAME: trading-bot
+      IMAGE_NAME: trading-bot
+      DOCKER_NETWORK: trading-bot-net
+      DOCKER_HOSTNAME: bot
+      DEPLOY_SSH_PORT: 22
+      DEPLOY_SSH_USER: root
+      DEPLOY_SSH_HOST: 47.130.45.132
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -68,10 +76,21 @@ jobs:
             API_SECRET=${{ env.API_SECRET }}
             AMOUNT_USDT=${{ env.AMOUNT_USDT }}
 
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ steps.meta.outputs.tags }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
-
+      - name: SSH to Server and Update Docker Container
+        run: |
+          DEPLOY_BASH_SCRIPT="echo ${{ secrets.DOCKER_USERNAME }} | docker login ${{ secrets.DOCKER_URL }} --username ${{ secrets.DOCKER_USERNAME }} --password-stdin \
+          && docker pull ${{ steps.meta.outputs.tags }} \
+          && if [ \"\$(docker ps -q -af name=${{ env.CONTAINER_NAME }})\" ]; then docker rm -f ${{ env.CONTAINER_NAME }}; fi \
+          && if [[ ! \"\$(docker images -q ${{ env.IMAGE_NAME }} 2> /dev/null)\" == \"\" ]]; then docker rmi -f ${{ env.IMAGE_NAME }}; fi \
+          && docker tag \$(docker image inspect -f '{{ .ID }}' ${{ steps.meta.outputs.tags }}:latest) ${{ env.IMAGE_NAME }} \
+          && if ! docker network inspect ${{ env.DOCKER_NETWORK }} >/dev/null 2>&1; then echo \"Network '${{ env.DOCKER_NETWORK }}' does not exist. Creating...\" && docker network create ${{ env.DOCKER_NETWORK }} && sleep 2; fi \
+          && docker run --restart always --hostname ${{ env.DOCKER_HOSTNAME }} --name ${{ env.CONTAINER_NAME }} --env-file /opt/trading-bot/.env -d --network ${{ env.DOCKER_NETWORK }} ${{ env.IMAGE_NAME }} \
+          && sleep $TIME_PERIOD \
+          && echo y | docker system prune \
+          && echo y | docker volume prune \
+          && exit"
+          ssh -oPasswordAuthentication=no \
+            -oUserKnownHostsFile=/dev/null \
+            -oStrictHostKeyChecking=no \
+            -p ${{ env.DEPLOY_SSH_PORT }} ${{ env.DEPLOY_SSH_USER }}@${{ env.DEPLOY_SSH_HOST }} $DEPLOY_BASH_SCRIPT
+        shell: sh
