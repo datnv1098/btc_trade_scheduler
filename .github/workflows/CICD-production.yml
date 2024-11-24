@@ -14,14 +14,6 @@ jobs:
       contents: read
       attestations: write
       id-token: write
-    env:
-      CONTAINER_NAME: trading-bot
-      IMAGE_NAME: trading-bot
-      DOCKER_NETWORK: trading-bot-net
-      DOCKER_HOSTNAME: bot
-      DEPLOY_SSH_PORT: 22
-      DEPLOY_SSH_USER: root
-      DEPLOY_SSH_HOST: 47.130.45.132
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -76,21 +68,50 @@ jobs:
             API_SECRET=${{ env.API_SECRET }}
             AMOUNT_USDT=${{ env.AMOUNT_USDT }}
 
-      - name: SSH to Server and Update Docker Container
-        run: |
-          DEPLOY_BASH_SCRIPT="echo ${{ secrets.DOCKER_USERNAME }} | docker login ${{ secrets.DOCKER_URL }} --username ${{ secrets.DOCKER_USERNAME }} --password-stdin \
-          && docker pull ${{ steps.meta.outputs.tags }} \
-          && if [ \"\$(docker ps -q -af name=${{ env.CONTAINER_NAME }})\" ]; then docker rm -f ${{ env.CONTAINER_NAME }}; fi \
-          && if [[ ! \"\$(docker images -q ${{ env.IMAGE_NAME }} 2> /dev/null)\" == \"\" ]]; then docker rmi -f ${{ env.IMAGE_NAME }}; fi \
-          && docker tag \$(docker image inspect -f '{{ .ID }}' ${{ steps.meta.outputs.tags }}:latest) ${{ env.IMAGE_NAME }} \
-          && if ! docker network inspect ${{ env.DOCKER_NETWORK }} >/dev/null 2>&1; then echo \"Network '${{ env.DOCKER_NETWORK }}' does not exist. Creating...\" && docker network create ${{ env.DOCKER_NETWORK }} && sleep 2; fi \
-          && docker run --restart always --hostname ${{ env.DOCKER_HOSTNAME }} --name ${{ env.CONTAINER_NAME }} --env-file /opt/trading-bot/.env -d --network ${{ env.DOCKER_NETWORK }} ${{ env.IMAGE_NAME }} \
-          && sleep $TIME_PERIOD \
-          && echo y | docker system prune \
-          && echo y | docker volume prune \
-          && exit"
-          ssh -oPasswordAuthentication=no \
-            -oUserKnownHostsFile=/dev/null \
-            -oStrictHostKeyChecking=no \
-            -p ${{ env.DEPLOY_SSH_PORT }} ${{ env.DEPLOY_SSH_USER }}@${{ env.DEPLOY_SSH_HOST }} $DEPLOY_BASH_SCRIPT
-        shell: sh
+  deploy:
+    runs-on: self-hosted
+    name: Deploy Docker image to production
+    env:
+      CONTAINER_NAME: trading-bot
+      IMAGE_NAME: trading-bot
+      DOCKER_NETWORK: trading-bot-net
+      DOCKER_HOSTNAME: bot
+      DEPLOY_SSH_PORT: 22
+      DEPLOY_SSH_USER: root
+      DEPLOY_SSH_HOST: 47.130.45.132
+    steps:
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: '${{ secrets.DOCKER_URL }}/node-app/trading-bot'
+
+      - name: executing remote ssh commands using key
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          CONTAINER_NAME: trading-bot
+          DOCKER_URL: ${{ secrets.DOCKER_URL }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE_URL: ${{ steps.meta.outputs.tags }}
+          IMAGE_NAME: trading-bot
+          DOCKER_NETWORK: trading-bot-net
+          DOCKER_HOSTNAME: bot
+          TIME_PERIOD: 10
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ env.DEPLOY_SSH_USER }}
+          key: ${{ secrets.KEY }}
+          port: ${{ env.DEPLOY_SSH_PORT }}
+          envs: CONTAINER_NAME,DOCKER_URL,DOCKER_USERNAME,DOCKER_PASSWORD,IMAGE_URL,IMAGE_NAME,DOCKER_NETWORK,DOCKER_HOSTNAME,TIME_PERIOD
+          script: |
+            echo $DOCKER_PASSWORD | docker login $DOCKER_URL --username $DOCKER_USERNAME --password-stdin
+            docker pull $IMAGE_URL
+            if [ "$(docker ps -q -af name=$CONTAINER_NAME)\" ]; then docker rm -f $CONTAINER_NAME; fi
+            if [[ ! \"\$(docker images -q $IMAGE_NAME 2> /dev/null)\" == \"\" ]]; then docker rmi -f $IMAGE_NAME; fi
+            docker tag \$(docker image inspect -f '{{ .ID' ${{ steps.meta.outputs.tags:latest) $IMAGE_NAME
+            if ! docker network inspect $DOCKER_NETWORK >/dev/null 2>&1; then echo \"Network '$DOCKER_NETWORK' does not exist. Creating...\" && docker network create $DOCKER_NETWORK && sleep 2; fi
+            docker run --restart always --hostname $DOCKER_HOSTNAME --name $CONTAINER_NAME --env-file /opt/trading-bot/.env -d --network $DOCKER_NETWORK $IMAGE_NAME
+            sleep $TIME_PERIOD
+            echo y | docker system prune
+            echo y | docker volume prune
