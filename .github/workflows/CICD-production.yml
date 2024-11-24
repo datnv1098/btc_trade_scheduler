@@ -84,7 +84,7 @@ jobs:
           DOCKER_HOSTNAME: bot
           TIME_PERIOD: 10
         with:
-          host: ${{ env.DEPLOY_SSH_HOST }}
+          host: ${{ secrets.DOCKER_URL }}
           username: ${{ env.DEPLOY_SSH_USER }}
           key_path: "/home/github-runner/.ssh/id_rsa"
           port: ${{ env.DEPLOY_SSH_PORT }}
