@@ -46,7 +46,7 @@ jobs:
           context: .
           file: ./deploy/Dockerfile
           push: true
-          tags: 'latest'
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
             TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
