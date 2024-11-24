@@ -93,6 +93,7 @@ jobs:
           key_path: ~/.ssh/id_rsa
           port: ${{ env.DEPLOY_SSH_PORT }}
           envs: CONTAINER_NAME,DOCKER_URL,DOCKER_USERNAME,DOCKER_PASSWORD,IMAGE_URL,IMAGE_NAME,DOCKER_NETWORK,DOCKER_HOSTNAME,TIME_PERIOD
+          debug: true
           script: |
             whoami
             ls -al
