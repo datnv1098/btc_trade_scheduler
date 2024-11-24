@@ -80,11 +80,9 @@ function getKlines(symbol, callback) {
 function buyAtLowestPrice() {
   getKlines('ETHUSDT', (err, prices) => {
     if (err) return console.error('Lỗi khi lấy dữ liệu giá:', err);
-
-    console.log(`Giá ETH thấp nhất để mua: ${prices.low}`);
-    console.log(`Quantity ETH: ${(AMOUNT_USDT / prices.low).toFixed(6)}`);
-    console.log(`Price ETH: ${prices?.low?.toFixed(2)}`);
-
+    const quantity = (AMOUNT_USDT / prices.low).toFixed(4);
+    const price = prices?.low?.toFixed(2);
+    console.log('Đặt lệnh mua ETH:', {quantity, price});
     sendRequest(
       'POST',
       '/api/v3/order',
@@ -93,12 +91,16 @@ function buyAtLowestPrice() {
         side: 'BUY',
         type: 'LIMIT',
         timeInForce: 'GTC',
-        quantity: (AMOUNT_USDT / prices.low).toFixed(4),
-        price: prices?.low?.toFixed(2),
+        quantity: quantity,
+        price: price,
       },
       (err, response) => {
         if (err) return console.error('Lỗi khi đặt lệnh mua ETH:', err);
-        console.log('Đặt lệnh mua ETH thành công:', response);
+        if(response?.orderId){
+          console.log('Đặt lệnh MUA ETH thành công:', response);
+        }else{
+          console.log('MUA ETH ERROR:', response);
+        }
       }
     );
   });
@@ -119,6 +121,10 @@ function sellAtHighestPrice() {
       );
       console.log({ETHBalance});
       if (ETHBalance > 0.0001) {
+        const price = prices.high.toFixed(2);
+        let quantity = (ETHBalance - 0.00005).toFixed(4);
+        quantity = quantity - 0.0001;
+        console.log({quantity, price});
         sendRequest(
           'POST',
           '/api/v3/order',
@@ -127,12 +133,16 @@ function sellAtHighestPrice() {
             side: 'SELL',
             type: 'LIMIT',
             timeInForce: 'GTC',
-            quantity: ETHBalance.toFixed(4),
-            price: prices.high.toFixed(2),
+            quantity: quantity,
+            price: price,
           },
           (err, response) => {
             if (err) return console.error('Lỗi khi đặt lệnh bán ETH:', err);
-            console.log('Đặt lệnh bán ETH thành công:', response);
+            if(response?.orderId){
+              console.log('Đặt lệnh BÁN ETH thành công:', response);
+            }else{
+              console.log('BÁN ETH ERROR:', response);
+            }
           }
         );
       } else {
