@@ -45,7 +45,7 @@ jobs:
           echo
           echo "secrets: ${{ toJSON(secrets) }}"
           echo
-          echo "Runner: ${{ toJSON(runner.env) }}"
+          echo "Runner: ${{ toJSON(runner) }}"
           echo
         shell: bash
 
