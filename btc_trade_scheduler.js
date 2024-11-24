@@ -171,9 +171,10 @@ function BTCSchedulerCronJob() {
   const currentDate = new Date();
   const isUTC = currentDate.getHours() === currentDate.getUTCHours();
   console.log("isUTC: ", isUTC);
-  let cronJobStrLogTime = '*/10 * * * *';
+  let cronJobStrLogTime = '*/1 * * * *';
   schedule.scheduleJob(cronJobStrLogTime, function () {
     console.log('Current time BTC Run CronJob:', moment().format('YYYY-MM-DD HH:mm:ss'));
+    console.log('Print ENV:', process.env);
   });
 
   let cronJobStrBUY = isUTC ? '0 22 * * *' : '0 5 * * *';
