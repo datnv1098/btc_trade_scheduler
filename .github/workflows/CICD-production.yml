@@ -29,7 +29,6 @@ jobs:
           images: node-app/trading-bot
       
       - name: Run script file
-        uses: actions/checkout@v2
         run: |
           ls -la /tmp/
           pwd
