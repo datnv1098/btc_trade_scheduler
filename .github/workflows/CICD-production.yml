@@ -92,7 +92,7 @@ jobs:
         with:
           host: ${{ secrets.DOCKER_URL }}
           username: ${{ env.DEPLOY_SSH_USER }}
-          key_path: ~/.ssh
+          key_path: /home/github-runner/.ssh/id_rsa
           port: ${{ env.DEPLOY_SSH_PORT }}
           envs: CONTAINER_NAME,DOCKER_URL,DOCKER_USERNAME,DOCKER_PASSWORD,IMAGE_URL,IMAGE_NAME,DOCKER_NETWORK,DOCKER_HOSTNAME,TIME_PERIOD
           debug: true
