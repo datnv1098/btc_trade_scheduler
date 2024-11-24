@@ -131,7 +131,9 @@ function sellAtHighestPrice() {
       console.log({ETHBalance});
       if (ETHBalance > 0.00015) {
         const price = prices.high.toFixed(2);
-        let quantity = (ETHBalance - 0.00005).toFixed(4);
+        let ETHBalancePercent = ETHBalance * 0.0001;
+        let quantity = (ETHBalance - ETHBalancePercent).toFixed(4);
+        quantity = parseFloat(quantity);
         quantity = quantity - 0.0001;
         console.log({quantity, price});
         sendRequest(
@@ -190,6 +192,18 @@ function ETHSchedulerCronJob() {
     console.log('Bán ETH dựa trên giá cao nhất trước 10h sáng...');
     sellAtHighestPrice();
   });
+
+  // let cronJobStrBUY2 = isUTC ? '0 10 * * *' : '0 17 * * *';
+  // schedule.scheduleJob(cronJobStrBUY2, () => {
+  //   console.log('Mua ETH dựa trên giá thấp nhất trước 5:00PM...', API_KEY);
+  //   buyAtLowestPrice();
+  // });
+  //
+  // let cronJobStrSELL2 = isUTC ? '0 15 * * *' : '0 22 * * *';
+  // schedule.scheduleJob(cronJobStrSELL2, () => {
+  //   console.log('Bán ETH dựa trên giá cao nhất trước 10:00PM...');
+  //   sellAtHighestPrice();
+  // });
 
   // Run test
   // buyAtLowestPrice();

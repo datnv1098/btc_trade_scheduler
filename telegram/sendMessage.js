@@ -20,9 +20,13 @@ function getMessageData(data = {}, isBuy = false) {
  */
 async function sendTelegramMessage(message) {
     try {
+        let removeSomeChar = message?.replaceAll('.', ',');
+        removeSomeChar = removeSomeChar?.replaceAll('{', ' ');
+        removeSomeChar = removeSomeChar?.replaceAll('}', ' ');
+        removeSomeChar = removeSomeChar?.replaceAll('-', ' ');
         await axios.post(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
             chat_id: telegramChatId,
-            text: message?.replaceAll('.', ','),
+            text: removeSomeChar,
             parse_mode: 'MarkdownV2'
         });
     } catch (error) {
