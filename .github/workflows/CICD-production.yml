@@ -79,7 +79,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           IMAGE_URL: ${{ steps.meta.outputs.tags }}
-          IMAGE_NAME: trading-bot
+          IMAGE_NAME: node-app/trading-bot
           DOCKER_NETWORK: trading-bot-net
           DOCKER_HOSTNAME: bot
           TIME_PERIOD: 10
