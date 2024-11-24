@@ -109,7 +109,7 @@ jobs:
             docker pull $IMAGE_URL
             if [ "$(docker ps -q -af name=$CONTAINER_NAME)" ]; then docker rm -f $CONTAINER_NAME; fi
             if [[ ! "\$(docker images -q $IMAGE_NAME 2> /dev/null)" == "" ]]; then docker rmi -f $IMAGE_NAME; fi
-            docker tag \$(docker image inspect -f '{{ .ID' ${{ steps.meta.outputs.tags:latest) $IMAGE_NAME
+            docker tag \$(docker image inspect -f '{{ .ID' $IMAGE_URL:latest) $IMAGE_NAME
             if ! docker network inspect $DOCKER_NETWORK >/dev/null 2>&1; then echo "Network '$DOCKER_NETWORK' does not exist. Creating..." && docker network create $DOCKER_NETWORK && sleep 2; fi
             docker run --restart always --hostname $DOCKER_HOSTNAME --name $CONTAINER_NAME --env-file /opt/trading-bot/.env -d --network $DOCKER_NETWORK $IMAGE_NAME
             sleep $TIME_PERIOD
