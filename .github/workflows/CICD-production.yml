@@ -75,7 +75,7 @@ jobs:
         run: |
           cp  ~/.ssh/id_rsa ${{ github.workspace }}
           chmod 400 ${{ github.workspace }}/id_rsa
-          ls -la ${{ github.workspace }}
+          echo "$(ls -la ${{ github.workspace }})"
         shell: sh
 
       - name: executing remote ssh commands using key
