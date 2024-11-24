@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const schedule = require('node-schedule');
 const axios = require("axios");
 const moment = require("moment");
+const {getMessageData, sendTelegramMessage} = require("./telegram/sendMessage");
 
 const API_KEY = process.env.API_KEY;
 const API_SECRET = process.env.API_SECRET;
@@ -95,11 +96,19 @@ function buyAtLowestPrice() {
         price: price,
       },
       (err, response) => {
-        if (err) return console.error('Lỗi khi đặt lệnh mua ETH:', err);
+        console.log(response);
+        if (err) return sendTelegramMessage('Mua ETH Error: ' + JSON.stringify(err)).then();
         if(response?.orderId){
-          console.log('Đặt lệnh MUA ETH thành công:', response);
+          const message = getMessageData({
+            symbol: 'ETHUSDT', quantity, price, amount: quantity * price
+          }, true);
+          sendTelegramMessage(message).then();
         }else{
-          console.log('MUA ETH ERROR:', response);
+          const message = (typeof response === 'string') ? response : JSON.stringify(response);
+          const msg = getMessageData({
+            symbol: 'ETHUSDT', quantity, price, message, amount: quantity * price
+          }, true);
+          sendTelegramMessage(msg).then();
         }
       }
     );
@@ -120,7 +129,7 @@ function sellAtHighestPrice() {
         data.balances.find(asset => asset.asset === 'ETH').free
       );
       console.log({ETHBalance});
-      if (ETHBalance > 0.0001) {
+      if (ETHBalance > 0.00015) {
         const price = prices.high.toFixed(2);
         let quantity = (ETHBalance - 0.00005).toFixed(4);
         quantity = quantity - 0.0001;
@@ -137,16 +146,25 @@ function sellAtHighestPrice() {
             price: price,
           },
           (err, response) => {
-            if (err) return console.error('Lỗi khi đặt lệnh bán ETH:', err);
+            console.log(response);
+            if (err) return sendTelegramMessage('Bán ETH Error: ' + JSON.stringify(err)).then();
             if(response?.orderId){
-              console.log('Đặt lệnh BÁN ETH thành công:', response);
+              const message = getMessageData({
+                symbol: 'ETHUSDT', quantity, price, amount: quantity * price
+              }, false);
+              sendTelegramMessage(message).then();
             }else{
-              console.log('BÁN ETH ERROR:', response);
+              const message = (typeof response === 'string') ? response : JSON.stringify(response);
+              const msg = getMessageData({
+                symbol: 'ETHUSDT', quantity, price, message, amount: quantity * price
+              }, false);
+              sendTelegramMessage(msg).then();
             }
           }
         );
       } else {
-        console.log('Không có ETH để bán.');
+        const message = 'Không có ETH để bán.';
+        sendTelegramMessage(message).then();
       }
     });
   });
