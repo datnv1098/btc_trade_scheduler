@@ -91,8 +91,6 @@ jobs:
           envs: CONTAINER_NAME,DOCKER_URL,DOCKER_USERNAME,DOCKER_PASSWORD,IMAGE_URL,IMAGE_NAME,DOCKER_NETWORK,DOCKER_HOSTNAME,TIME_PERIOD
           script_stop: true
           script: |
-            whoami
-            ls -al
             echo $DOCKER_PASSWORD | docker login $DOCKER_URL --username $DOCKER_USERNAME --password-stdin
             docker pull $IMAGE_URL
             if [ "$(docker ps -q -af name=$CONTAINER_NAME)" ]; then docker rm -f $CONTAINER_NAME; fi
