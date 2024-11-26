@@ -96,7 +96,6 @@ function buyAtLowestPrice() {
         price: price,
       },
       (err, response) => {
-        console.log(response);
         if (err) return sendTelegramMessage('Mua ETH Error: ' + JSON.stringify(err)).then();
         if(response?.orderId){
           const message = getMessageData({
@@ -148,7 +147,6 @@ function sellAtHighestPrice() {
             price: price,
           },
           (err, response) => {
-            console.log(response);
             if (err) return sendTelegramMessage('Bán ETH Error: ' + JSON.stringify(err)).then();
             if(response?.orderId){
               const message = getMessageData({
@@ -176,10 +174,9 @@ function sellAtHighestPrice() {
 function ETHSchedulerCronJob() {
   const currentDate = new Date();
   const isUTC = currentDate.getHours() === currentDate.getUTCHours();
-  let cronJobStrLogTime = '*/1 * * * *';
+  let cronJobStrLogTime = '*/10 * * * *';
   schedule.scheduleJob(cronJobStrLogTime, function () {
     console.log('Current time ETH Run CronJob:', moment().format('YYYY-MM-DD HH:mm:ss'));
-    console.log('Print ENV:', process.env);
   });
 
   let cronJobStrBUY = isUTC ? '0 22 * * *' : '0 5 * * *';
