@@ -158,7 +158,8 @@ function sellAtHighestPrice() {
           }
         );
       } else {
-        console.log('Không có BTC để bán.');
+        const message = 'Không có BTC để bán.';
+        sendTelegramMessage(message).then();
       }
     });
   });
