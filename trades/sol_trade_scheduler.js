@@ -129,9 +129,9 @@ function sellAtHighestPrice() {
         data.balances.find(asset => asset.asset === 'SOL').free
       );
       console.log({SOLBalance});
-      if (SOLBalance >= 0.0001) {
+      if (SOLBalance >= 0.001) {
         const price = roundDownToFourDecimalPlaces(prices.high, 2);
-        let quantity = roundDownToFourDecimalPlaces(SOLBalance, 4);
+        let quantity = roundDownToFourDecimalPlaces(SOLBalance, 3);
         sendRequest(
           'POST',
           '/api/v3/order',

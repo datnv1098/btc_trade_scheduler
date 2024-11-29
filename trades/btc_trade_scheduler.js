@@ -129,7 +129,7 @@ function sellAtHighestPrice() {
       );
       console.log({btcBalance});
       if (btcBalance >= 0.0001) {
-        const quantity = roundDownToFourDecimalPlaces(btcBalance, 4);
+        const quantity = roundDownToFourDecimalPlaces(btcBalance, 5);
         const price = roundDownToFourDecimalPlaces(prices.high, 2);
         sendRequest(
           'POST',

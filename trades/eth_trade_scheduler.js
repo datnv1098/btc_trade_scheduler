@@ -129,7 +129,7 @@ function sellAtHighestPrice() {
         data.balances.find(asset => asset.asset === 'ETH').free
       );
       console.log({ETHBalance});
-      if (ETHBalance >= 0.0001) {
+      if (ETHBalance >= 0.0013) {
         const price = roundDownToFourDecimalPlaces(prices.high, 2);
         let quantity = roundDownToFourDecimalPlaces(ETHBalance, 4);
         sendRequest(

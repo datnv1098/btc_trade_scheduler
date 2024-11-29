@@ -129,7 +129,7 @@ function sellAtHighestPrice() {
         data.balances.find(asset => asset.asset === 'BONK').free
       );
       console.log({BONKBalance});
-      if (BONKBalance >= 0.0001) {
+      if (BONKBalance >= 1) {
         const price = roundDownToFourDecimalPlaces(prices.high, 8);
         let quantity = roundDownToFourDecimalPlaces(BONKBalance, 0);
         sendRequest(
