@@ -6,6 +6,7 @@ const {BTCSchedulerCronJob} = require("./trades/btc_trade_scheduler.js");
 const {ETHSchedulerCronJob} = require("./trades/eth_trade_scheduler");
 const {UNISchedulerCronJob} = require("./trades/uni_trade_scheduler");
 const {SOLSchedulerCronJob} = require("./trades/sol_trade_scheduler");
+const {BONKSchedulerCronJob} = require("./trades/bonk_trade_scheduler");
 
 function runMain() {
   const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -16,6 +17,7 @@ function runMain() {
   ETHSchedulerCronJob();
   UNISchedulerCronJob();
   SOLSchedulerCronJob();
+  BONKSchedulerCronJob();
 }
 
 runMain();
