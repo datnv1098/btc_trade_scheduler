@@ -1,9 +1,10 @@
 require('dotenv').config();
 const moment = require("moment");
-const {BTCSchedulerCronJob} = require("./btc_trade_scheduler.js");
-const {ETHSchedulerCronJob} = require("./eth_trade_scheduler");
 const {getChannelId} = require("./telegram/getChannelId");
 const {sendTelegramMessage} = require("./telegram/sendMessage");
+const {BTCSchedulerCronJob} = require("./trades/btc_trade_scheduler.js");
+const {ETHSchedulerCronJob} = require("./trades/eth_trade_scheduler");
+const {UNISchedulerCronJob} = require("./trades/uni_trade_scheduler");
 
 function runMain() {
   const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -12,6 +13,7 @@ function runMain() {
   sendTelegramMessage(`Start server\nSystem TimeZone: ${systemTimeZone}\n${moment().format('DD/MM/YYYY HH:mm:ss')}`).then()
   BTCSchedulerCronJob();
   ETHSchedulerCronJob();
+  UNISchedulerCronJob();
 }
 
 runMain();

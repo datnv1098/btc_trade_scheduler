@@ -3,7 +3,7 @@ function roundDownToFourDecimalPlaces(num = 0, decimalPlace = 4) {
   for (let i = 1; i <= decimalPlace; i++) {
     floorNum = floorNum * 10;
   }
-  return Math.floor(num * 10000) / 10000;
+  return Math.floor(num * floorNum) / floorNum;
 }
 
 module.exports = {

@@ -4,8 +4,8 @@ const crypto = require('crypto');
 const schedule = require('node-schedule');
 const axios = require("axios");
 const moment = require("moment");
-const {sendTelegramMessage, getMessageData} = require("./telegram/sendMessage");
-const {roundDownToFourDecimalPlaces} = require("./commonFunction");
+const {sendTelegramMessage, getMessageData} = require("../telegram/sendMessage");
+const {roundDownToFourDecimalPlaces} = require("../utils/commonFunction");
 
 const API_KEY = process.env.API_KEY;
 const API_SECRET = process.env.API_SECRET;

@@ -4,8 +4,8 @@ const crypto = require('crypto');
 const schedule = require('node-schedule');
 const axios = require("axios");
 const moment = require("moment");
-const {getMessageData, sendTelegramMessage} = require("./telegram/sendMessage");
-const {roundDownToFourDecimalPlaces} = require("./commonFunction");
+const {getMessageData, sendTelegramMessage} = require("../telegram/sendMessage");
+const {roundDownToFourDecimalPlaces} = require("../utils/commonFunction");
 
 const API_KEY = process.env.API_KEY;
 const API_SECRET = process.env.API_SECRET;
@@ -14,7 +14,7 @@ const BASE_URL = 'https://api.binance.com';
 // Thời gian lấy giá (10 phút trước)
 const INTERVAL = '1m'; // Đơn vị: 1 phút
 const LOOKBACK_MINUTES = 10;
-const AMOUNT_USDT = process.env.AMOUNT_USDT || 30;
+const AMOUNT_USDT = 20;
 
 // Hàm tạo chữ ký
 function createSignature(queryString) {
@@ -55,7 +55,7 @@ function getKlines(symbol, callback) {
 
   try {
     const params = {
-      symbol,       // Cặp giao dịch, ví dụ: ETHUSDT
+      symbol,       // Cặp giao dịch, ví dụ: UNIUSDT
       interval: INTERVAL,     // Khoảng thời gian nến, ví dụ: 1m, 5m
       startTime,    // Timestamp thời điểm bắt đầu (ms)
       endTime,      // Timestamp thời điểm kết thúc (ms)
@@ -80,16 +80,16 @@ function getKlines(symbol, callback) {
 
 // Đặt lệnh mua với giá thấp nhất
 function buyAtLowestPrice() {
-  getKlines('ETHUSDT', (err, prices) => {
+  getKlines('UNIUSDT', (err, prices) => {
     if (err) return console.error('Lỗi khi lấy dữ liệu giá:', err);
-    const quantity = roundDownToFourDecimalPlaces(AMOUNT_USDT / prices.low, 4);
+    const quantity = roundDownToFourDecimalPlaces(AMOUNT_USDT / prices.low, 2);
     const price = roundDownToFourDecimalPlaces(prices?.low, 2);
-    console.log('Đặt lệnh mua ETH:', {quantity, price});
+    console.log('Đặt lệnh mua UNI:', {quantity, price});
     sendRequest(
       'POST',
       '/api/v3/order',
       {
-        symbol: 'ETHUSDT',
+        symbol: 'UNIUSDT',
         side: 'BUY',
         type: 'LIMIT',
         timeInForce: 'GTC',
@@ -97,16 +97,16 @@ function buyAtLowestPrice() {
         price: price,
       },
       (err, response) => {
-        if (err) return sendTelegramMessage('Mua ETH Error: ' + JSON.stringify(err)).then();
+        if (err) return sendTelegramMessage('Mua UNI Error: ' + JSON.stringify(err)).then();
         if (response?.orderId) {
           const message = getMessageData({
-            symbol: 'ETHUSDT', quantity, price, amount: quantity * price
+            symbol: 'UNIUSDT', quantity, price, amount: quantity * price
           }, true);
           sendTelegramMessage(message).then();
         } else {
           const message = (typeof response === 'string') ? response : JSON.stringify(response);
           const msg = getMessageData({
-            symbol: 'ETHUSDT', quantity, price, message, amount: quantity * price
+            symbol: 'UNIUSDT', quantity, price, message, amount: quantity * price
           }, true);
           sendTelegramMessage(msg).then();
         }
@@ -117,26 +117,26 @@ function buyAtLowestPrice() {
 
 // Đặt lệnh bán với giá cao nhất
 function sellAtHighestPrice() {
-  getKlines('ETHUSDT', (err, prices) => {
-    if (err) return console.error('Lỗi khi lấy dữ liệu giá ETH:', err);
+  getKlines('UNIUSDT', (err, prices) => {
+    if (err) return console.error('Lỗi khi lấy dữ liệu giá UNI:', err);
 
-    console.log(`Giá cao nhất để bán ETH: ${prices.high}`);
+    console.log(`Giá cao nhất để bán UNI: ${prices.high}`);
 
-    // Lấy số dư ETH hiện tại
+    // Lấy số dư UNI hiện tại
     sendRequest('GET', '/api/v3/account', {}, (err, data) => {
       if (err) return console.error('Lỗi khi lấy thông tin tài khoản:', err);
-      const ETHBalance = parseFloat(
-        data.balances.find(asset => asset.asset === 'ETH').free
+      const UNIBalance = parseFloat(
+        data.balances.find(asset => asset.asset === 'UNI').free
       );
-      console.log({ETHBalance});
-      if (ETHBalance >= 0.0001) {
+      console.log({UNIBalance});
+      if (UNIBalance >= 0.0001) {
         const price = roundDownToFourDecimalPlaces(prices.high, 2);
-        let quantity = roundDownToFourDecimalPlaces(ETHBalance, 4);
+        let quantity = roundDownToFourDecimalPlaces(UNIBalance, 4);
         sendRequest(
           'POST',
           '/api/v3/order',
           {
-            symbol: 'ETHUSDT',
+            symbol: 'UNIUSDT',
             side: 'SELL',
             type: 'LIMIT',
             timeInForce: 'GTC',
@@ -144,23 +144,23 @@ function sellAtHighestPrice() {
             price: price,
           },
           (err, response) => {
-            if (err) return sendTelegramMessage('Bán ETH Error: ' + JSON.stringify(err)).then();
+            if (err) return sendTelegramMessage('Bán UNI Error: ' + JSON.stringify(err)).then();
             if (response?.orderId) {
               const message = getMessageData({
-                symbol: 'ETHUSDT', quantity, price, amount: quantity * price
+                symbol: 'UNIUSDT', quantity, price, amount: quantity * price
               }, false);
               sendTelegramMessage(message).then();
             } else {
               const message = (typeof response === 'string') ? response : JSON.stringify(response);
               const msg = getMessageData({
-                symbol: 'ETHUSDT', quantity, price, message, amount: quantity * price
+                symbol: 'UNIUSDT', quantity, price, message, amount: quantity * price
               }, false);
               sendTelegramMessage(msg).then();
             }
           }
         );
       } else {
-        const message = 'Không có ETH để bán.';
+        const message = 'Không có UNI để bán.';
         sendTelegramMessage(message).then();
       }
     });
@@ -168,35 +168,35 @@ function sellAtHighestPrice() {
 }
 
 
-function ETHSchedulerCronJob() {
+function UNISchedulerCronJob() {
   const currentDate = new Date();
   const isUTC = currentDate.getHours() === currentDate.getUTCHours();
   let cronJobStrLogTime = '*/10 * * * *';
   schedule.scheduleJob(cronJobStrLogTime, function () {
-    console.log('Current time ETH Run CronJob:', moment().format('YYYY-MM-DD HH:mm:ss'));
+    console.log('Current time UNI Run CronJob:', moment().format('YYYY-MM-DD HH:mm:ss'));
   });
 
   let cronJobStrBUY = isUTC ? '0 22 * * *' : '0 5 * * *';
   schedule.scheduleJob(cronJobStrBUY, () => {
-    console.log('Mua ETH dựa trên giá thấp nhất trước 5h sáng...', API_KEY);
+    console.log('Mua UNI dựa trên giá thấp nhất trước 5h sáng...', API_KEY);
     buyAtLowestPrice();
   });
 
   let cronJobStrSELL = isUTC ? '0 3 * * *' : '0 10 * * *';
   schedule.scheduleJob(cronJobStrSELL, () => {
-    console.log('Bán ETH dựa trên giá cao nhất trước 10h sáng...');
+    console.log('Bán UNI dựa trên giá cao nhất trước 10h sáng...');
     sellAtHighestPrice();
   });
 
   // let cronJobStrBUY2 = isUTC ? '0 10 * * *' : '0 17 * * *';
   // schedule.scheduleJob(cronJobStrBUY2, () => {
-  //   console.log('Mua ETH dựa trên giá thấp nhất trước 5:00PM...', API_KEY);
+  //   console.log('Mua UNI dựa trên giá thấp nhất trước 5:00PM...', API_KEY);
   //   buyAtLowestPrice();
   // });
   //
   // let cronJobStrSELL2 = isUTC ? '0 15 * * *' : '0 22 * * *';
   // schedule.scheduleJob(cronJobStrSELL2, () => {
-  //   console.log('Bán ETH dựa trên giá cao nhất trước 10:00PM...');
+  //   console.log('Bán UNI dựa trên giá cao nhất trước 10:00PM...');
   //   sellAtHighestPrice();
   // });
 
@@ -206,5 +206,5 @@ function ETHSchedulerCronJob() {
 }
 
 module.exports = {
-  ETHSchedulerCronJob
+  UNISchedulerCronJob
 };
