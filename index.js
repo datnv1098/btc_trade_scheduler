@@ -13,7 +13,7 @@ function runMain() {
   const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   console.log("Main Start Time: ", moment().format('YYYY-MM-DD HH:mm:ss'));
   getChannelId().then()
-  // sendTelegramMessage(`Start server\nSystem TimeZone: ${systemTimeZone}\n${moment().format('DD/MM/YYYY HH:mm:ss')}`).then()
+  sendTelegramMessage(`Start server\n${moment().format('DD/MM/YYYY HH:mm:ss')}\nSystem TimeZone: ${systemTimeZone}`).then()
 
   BTCSchedulerCronJob(); //50 USDT
   ETHSchedulerCronJob(); //50 USDT
