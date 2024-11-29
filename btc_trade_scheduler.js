@@ -5,6 +5,7 @@ const schedule = require('node-schedule');
 const axios = require("axios");
 const moment = require("moment");
 const {sendTelegramMessage, getMessageData} = require("./telegram/sendMessage");
+const {roundDownToFourDecimalPlaces} = require("./commonFunction");
 
 const API_KEY = process.env.API_KEY;
 const API_SECRET = process.env.API_SECRET;
@@ -81,8 +82,8 @@ function getKlines(symbol, callback) {
 function buyAtLowestPrice() {
   getKlines('BTCUSDT', (err, prices) => {
     if (err) return console.error('Lỗi khi lấy dữ liệu giá:', err);
-    const quantity = (AMOUNT_USDT / prices.low).toFixed(5);
-    const price = prices?.low?.toFixed(2);
+    const quantity = roundDownToFourDecimalPlaces(AMOUNT_USDT / prices.low, 5)
+    const price = roundDownToFourDecimalPlaces(prices?.low, 2)
     sendRequest(
       'POST',
       '/api/v3/order',
@@ -96,12 +97,12 @@ function buyAtLowestPrice() {
       },
       (err, response) => {
         if (err) return sendTelegramMessage('Mua BTC Error: ' + JSON.stringify(err)).then();
-        if(response?.orderId){
+        if (response?.orderId) {
           const message = getMessageData({
             symbol: 'BTCUSDT', quantity, price, amount: quantity * price
           }, true);
           sendTelegramMessage(message).then();
-        }else{
+        } else {
           const message = (typeof response === 'string') ? response : JSON.stringify(response);
           const msg = getMessageData({
             symbol: 'BTCUSDT', quantity, price, message, amount: quantity * price
@@ -127,9 +128,9 @@ function sellAtHighestPrice() {
         data.balances.find(asset => asset.asset === 'BTC').free
       );
       console.log({btcBalance});
-      if (btcBalance > 0.0001) {
-        const quantity = btcBalance.toFixed(4);
-        const price = prices.high.toFixed(2);
+      if (btcBalance >= 0.0001) {
+        const quantity = roundDownToFourDecimalPlaces(btcBalance, 4);
+        const price = roundDownToFourDecimalPlaces(prices.high, 2);
         sendRequest(
           'POST',
           '/api/v3/order',
@@ -143,12 +144,12 @@ function sellAtHighestPrice() {
           },
           (err, response) => {
             if (err) return sendTelegramMessage('Bán BTC Error: ' + JSON.stringify(err)).then();
-            if(response?.orderId){
+            if (response?.orderId) {
               const message = getMessageData({
                 symbol: 'BTCUSDT', quantity, price, amount: quantity * price
               }, false);
               sendTelegramMessage(message).then();
-            }else{
+            } else {
               const message = (typeof response === 'string') ? response : JSON.stringify(response);
               const msg = getMessageData({
                 symbol: 'BTCUSDT', quantity, price, message, amount: quantity * price

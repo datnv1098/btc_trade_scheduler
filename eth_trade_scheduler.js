@@ -5,6 +5,7 @@ const schedule = require('node-schedule');
 const axios = require("axios");
 const moment = require("moment");
 const {getMessageData, sendTelegramMessage} = require("./telegram/sendMessage");
+const {roundDownToFourDecimalPlaces} = require("./commonFunction");
 
 const API_KEY = process.env.API_KEY;
 const API_SECRET = process.env.API_SECRET;
@@ -81,8 +82,8 @@ function getKlines(symbol, callback) {
 function buyAtLowestPrice() {
   getKlines('ETHUSDT', (err, prices) => {
     if (err) return console.error('Lỗi khi lấy dữ liệu giá:', err);
-    const quantity = (AMOUNT_USDT / prices.low).toFixed(4);
-    const price = prices?.low?.toFixed(2);
+    const quantity = roundDownToFourDecimalPlaces(AMOUNT_USDT / prices.low, 4);
+    const price = roundDownToFourDecimalPlaces(prices?.low, 2);
     console.log('Đặt lệnh mua ETH:', {quantity, price});
     sendRequest(
       'POST',
@@ -97,12 +98,12 @@ function buyAtLowestPrice() {
       },
       (err, response) => {
         if (err) return sendTelegramMessage('Mua ETH Error: ' + JSON.stringify(err)).then();
-        if(response?.orderId){
+        if (response?.orderId) {
           const message = getMessageData({
             symbol: 'ETHUSDT', quantity, price, amount: quantity * price
           }, true);
           sendTelegramMessage(message).then();
-        }else{
+        } else {
           const message = (typeof response === 'string') ? response : JSON.stringify(response);
           const msg = getMessageData({
             symbol: 'ETHUSDT', quantity, price, message, amount: quantity * price
@@ -128,13 +129,9 @@ function sellAtHighestPrice() {
         data.balances.find(asset => asset.asset === 'ETH').free
       );
       console.log({ETHBalance});
-      if (ETHBalance > 0.00015) {
-        const price = prices.high.toFixed(2);
-        let ETHBalancePercent = ETHBalance * 0.0001;
-        let quantity = (ETHBalance - ETHBalancePercent).toFixed(4);
-        quantity = parseFloat(quantity);
-        quantity = quantity - 0.0001;
-        console.log({quantity, price});
+      if (ETHBalance >= 0.0001) {
+        const price = roundDownToFourDecimalPlaces(prices.high, 2);
+        let quantity = roundDownToFourDecimalPlaces(ETHBalance, 4);
         sendRequest(
           'POST',
           '/api/v3/order',
@@ -148,12 +145,12 @@ function sellAtHighestPrice() {
           },
           (err, response) => {
             if (err) return sendTelegramMessage('Bán ETH Error: ' + JSON.stringify(err)).then();
-            if(response?.orderId){
+            if (response?.orderId) {
               const message = getMessageData({
                 symbol: 'ETHUSDT', quantity, price, amount: quantity * price
               }, false);
               sendTelegramMessage(message).then();
-            }else{
+            } else {
               const message = (typeof response === 'string') ? response : JSON.stringify(response);
               const msg = getMessageData({
                 symbol: 'ETHUSDT', quantity, price, message, amount: quantity * price
