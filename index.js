@@ -20,8 +20,8 @@ function runMain() {
   // SOLSchedulerCronJob(); //50 USDT
   // BNBSchedulerCronJob(); //50 USDT
   //
-  BONKSchedulerCronJob(); // 15 USDT
-  UNISchedulerCronJob(); // 15 USDT
+  // BONKSchedulerCronJob(); // 15 USDT
+  // UNISchedulerCronJob(); // 15 USDT
 
   //MIN USDT FOR RUN: 230 USDT
 }
