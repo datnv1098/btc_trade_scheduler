@@ -15,13 +15,13 @@ function runMain() {
   getChannelId().then()
   sendTelegramMessage(`Start server\n${moment().format('DD/MM/YYYY HH:mm:ss')}\nSystem TimeZone: ${systemTimeZone}`).then()
 
-  BTCSchedulerCronJob(); //50 USDT
-  ETHSchedulerCronJob(); //50 USDT
-  SOLSchedulerCronJob(); //50 USDT
-  BNBSchedulerCronJob(); //50 USDT
-
-  BONKSchedulerCronJob(); // 15 USDT
-  UNISchedulerCronJob(); // 15 USDT
+  // BTCSchedulerCronJob(); //50 USDT
+  // ETHSchedulerCronJob(); //50 USDT
+  // SOLSchedulerCronJob(); //50 USDT
+  // BNBSchedulerCronJob(); //50 USDT
+  //
+  // BONKSchedulerCronJob(); // 15 USDT
+  // UNISchedulerCronJob(); // 15 USDT
 
   //MIN USDT FOR RUN: 230 USDT
 }
