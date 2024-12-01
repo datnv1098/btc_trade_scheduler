@@ -97,7 +97,7 @@ jobs:
             if [[ ! "$(docker images -q $IMAGE_NAME 2> /dev/null)" == "" ]]; then docker rmi -f $IMAGE_NAME; fi
             docker tag $(docker image inspect $IMAGE_URL | grep '"Id":' | awk '{print $2}' | tr -d '",') $IMAGE_NAME
             if ! docker network inspect $DOCKER_NETWORK >/dev/null 2>&1; then echo "Network '$DOCKER_NETWORK' does not exist. Creating..." && docker network create $DOCKER_NETWORK && sleep 2; fi
-            docker run --restart always --hostname $DOCKER_HOSTNAME --name $CONTAINER_NAME --env-file /opt/trading-bot/.env -d --network $DOCKER_NETWORK $IMAGE_NAME
+            docker run --hostname $DOCKER_HOSTNAME --name $CONTAINER_NAME --env-file /opt/trading-bot/.env -d --network $DOCKER_NETWORK $IMAGE_NAME
             sleep $TIME_PERIOD
             echo y | docker system prune
             echo y | docker volume prune
