@@ -11,7 +11,7 @@ const {BNBSchedulerCronJob} = require("./trades/bnb_trade_scheduler");
 
 function runMain() {
   const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  console.log("Main Start Time: ", moment().format('YYYY-MM-DD HH:mm:ss'));
+  console.log("Deployed Time: ", moment().format('YYYY-MM-DD HH:mm:ss'));
   getChannelId().then()
   sendTelegramMessage(`Start server\n${moment().format('DD/MM/YYYY HH:mm:ss')}\nSystem TimeZone: ${systemTimeZone}`).then()
 
